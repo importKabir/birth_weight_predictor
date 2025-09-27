@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baby Weight Prediction</title>
+<style>
+:root {
+  --bg-gradient: linear-gradient(135deg, #f9d423, #ff4e50);
+  --form-bg: rgba(255, 255, 255, 0.18);
+  --form-text: #333;
+  --label-color: #222;
+  --button-gradient: linear-gradient(135deg, #36d1dc, #5b86e5);
+  --result-bg: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode {
+  --bg-gradient: linear-gradient(135deg, #141E30, #243B55);
+  --form-bg: rgba(0, 0, 0, 0.5);
+  --form-text: #f0f0f0;
+  --label-color: #ddd;
+  --button-gradient: linear-gradient(135deg, #8e2de2, #4a00e0);
+  --result-bg: rgba(0, 0, 0, 0.4);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-gradient);
+  transition: background 0.6s ease;
+}
+
+/* Dark mode button */
+.dark-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease;
+}
+.dark-toggle:hover {
+  transform: rotate(20deg) scale(1.1);
+}
+
+form {
+  background: var(--form-bg);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  width: 300px;
+  text-align: center;
+  animation: fadeIn 1s ease-in-out;
+  color: var(--form-text);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  color: var(--form-text);
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--label-color);
+  text-align: left;
+}
+
+input[type="number"],
+input[type="checkbox"] {
+  width: 100%;
+  margin-top: 5px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--form-text);
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease;
+}
+
+input[type="number"]:focus {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+input[type="checkbox"] {
+  width: auto;
+  transform: scale(1.2);
+}
+
+.buttons {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+button {
+  flex: 1;
+  padding: 10px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--button-gradient);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.reset-btn {
+  background: linear-gradient(135deg, #ff512f, #dd2476);
+}
+
+/* Result Section */
+.result-section {
+  margin-top: 20px;
+  padding: 12px;
+  background: var(--result-bg);
+  border-radius: 12px;
+  color: var(--form-text);
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+</style>
+</head>
+<body>
+  <button class="dark-toggle" onclick="toggleDarkMode()">🌙</button>
+
+  <form action="/predict" method="POST">
+    <h1>Predict the weight of your child at birth!</h1>
+    
+    <label>Gestation Period</label>
+    <input name="gestation" type="number">
+
+    <label>Parity</label>
+    <input name="parity" type="number">
+
+    <label>Age</label>
+    <input name="age" type="number">
+
+    <label>Height</label>
+    <input name="height" type="number">
+
+    <label>Weight</label>
+    <input name="weight" type="number">
+
+    <label>Do you smoke?</label>
+    <input name="smoke" type="checkbox">
+
+    <div class="buttons">
+      <button type="submit">Predict</button>
+      <button type="button" class="reset-btn" onclick="resetForm()">Reset</button>
+    </div>
+
+    {% if prediction %}
+      <div class="result-section">
+        Predicted Birth Weight: {{ prediction }}
+      </div>
+    {% endif %}
+  </form>
+
+<script>
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+  const toggle = document.querySelector(".dark-toggle");
+  if(document.body.classList.contains("dark-mode")) {
+    toggle.textContent = "☀️";
+  } else {
+    toggle.textContent = "🌙";
+  }
+}
+</script>
+<script>
+function resetForm() {
+  const form = document.querySelector("form");
+  form.reset();
+  // remove prediction result if exists
+  const result = document.querySelector(".result-section");
+  if(result) result.remove();
+}
+</script>
+
+</body>
+</html>
